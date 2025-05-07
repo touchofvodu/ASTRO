@@ -1,0 +1,547 @@
+// File structure for complete astrology app
+
+// App.js - Main app component with routing
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LiveChart from './components/LiveChart';
+import BirthChart from './components/BirthChart';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import Dashboard from './components/Dashboard';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+
+function App() {
+  return (
+    <Router>
+      <div className="app bg-black text-white min-h-screen">
+        <Routes>
+          <Route path="/" element={<LiveChart />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/birth-chart" 
+            element={
+              <ProtectedRoute>
+                <BirthChart />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+
+// components/Auth/Register.js - Registration form
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Register = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    birthDate: '',
+    birthTime: '',
+    birthPlace: '',
+    name: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Here you would implement actual registration with Firebase, Auth0, etc.
+    console.log('Registration data:', formData);
+    
+    // For demo purposes, store in localStorage
+    localStorage.setItem('user', JSON.stringify({
+      email: formData.email,
+      name: formData.name,
+      isAuthenticated: true,
+      birthData: {
+        date: formData.birthDate,
+        time: formData.birthTime,
+        place: formData.birthPlace
+      }
+    }));
+    
+    navigate('/dashboard');
+  };
+
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-black">
+      <div className="w-full max-w-md p-6 bg-black border border-gray-800 rounded-lg">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">Create Your Account</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+              required
+            />
+          </div>
+          
+          <div className="pt-4 border-t border-gray-800">
+            <h3 className="text-lg font-medium mb-2 text-gray-200">Birth Information</h3>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Birth Date</label>
+              <input
+                type="date"
+                name="birthDate"
+                value={formData.birthDate}
+                onChange={handleChange}
+                className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+                required
+              />
+            </div>
+            
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-300">Birth Time</label>
+              <input
+                type="time"
+                name="birthTime"
+                value={formData.birthTime}
+                onChange={handleChange}
+                className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+                required
+              />
+            </div>
+            
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-300">Birth Place</label>
+              <input
+                type="text"
+                name="birthPlace"
+                value={formData.birthPlace}
+                onChange={handleChange}
+                placeholder="City, Country"
+                className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="pt-4">
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-medium"
+            >
+              Create Account
+            </button>
+          </div>
+          
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-400">
+              Already have an account?{' '}
+              <a href="/login" className="text-indigo-400 hover:text-indigo-300">
+                Log in
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Register;
+
+
+// components/Auth/Login.js - Login form
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Login = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Here you would implement actual authentication
+    console.log('Login attempt with:', formData);
+    
+    // For demo purposes, simulate successful login
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (storedUser.email === formData.email) {
+      // Update authentication status
+      storedUser.isAuthenticated = true;
+      localStorage.setItem('user', JSON.stringify(storedUser));
+      navigate('/dashboard');
+    } else {
+      alert('Login failed. Please check your credentials.');
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-black">
+      <div className="w-full max-w-md p-6 bg-black border border-gray-800 rounded-lg">
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">Log In</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full p-2 mt-1 bg-gray-900 border border-gray-700 rounded-md text-white"
+              required
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-indigo-600 bg-gray-900 border-gray-700 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
+                Remember me
+              </label>
+            </div>
+            
+            <a href="#" className="text-sm text-indigo-400 hover:text-indigo-300">
+              Forgot password?
+            </a>
+          </div>
+          
+          <div>
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-medium"
+            >
+              Log In
+            </button>
+          </div>
+          
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-400">
+              Don't have an account?{' '}
+              <a href="/register" className="text-indigo-400 hover:text-indigo-300">
+                Sign up
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
+
+
+// components/Dashboard.js - User dashboard
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.isAuthenticated) {
+      navigate('/login');
+    } else {
+      setUserData(user);
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    user.isAuthenticated = false;
+    localStorage.setItem('user', JSON.stringify(user));
+    navigate('/login');
+  };
+
+  if (!userData) {
+    return <div className="text-center p-8">Loading...</div>;
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-white">Your Astrology Dashboard</h1>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md text-sm"
+        >
+          Log Out
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-black p-6 rounded-lg border border-gray-800">
+          <h2 className="text-xl font-semibold mb-4 text-white">Your Birth Chart</h2>
+          <div className="space-y-2 text-gray-300 text-sm">
+            <p><strong>Date:</strong> {userData.birthData?.date || 'Not set'}</p>
+            <p><strong>Time:</strong> {userData.birthData?.time || 'Not set'}</p>
+            <p><strong>Place:</strong> {userData.birthData?.place || 'Not set'}</p>
+          </div>
+          <div className="mt-4">
+            <button
+              onClick={() => navigate('/birth-chart')}
+              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white text-sm"
+            >
+              View Your Birth Chart
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-black p-6 rounded-lg border border-gray-800">
+          <h2 className="text-xl font-semibold mb-4 text-white">Current Planetary Positions</h2>
+          <p className="text-gray-300 text-sm mb-4">
+            View the real-time movements of all planets through the zodiac.
+          </p>
+          <div className="mt-4">
+            <button
+              onClick={() => navigate('/')}
+              className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white text-sm"
+            >
+              View Live Chart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+// components/BirthChart.js - Personal birth chart component
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+// Import the AstrologyChartComponent but modify it to accept a specific date/time
+// This would be a modified version of the LiveAstrologyChartDemo
+import AstrologyChart from './AstrologyChart';
+
+const BirthChart = () => {
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState(null);
+  const [birthDate, setBirthDate] = useState(null);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
+    setUserData(user);
+    
+    // Parse the birth date and time into a JavaScript Date object
+    if (user.birthData?.date && user.birthData?.time) {
+      const [year, month, day] = user.birthData.date.split('-').map(Number);
+      const [hours, minutes] = user.birthData.time.split(':').map(Number);
+      
+      // Note: month is 0-based in JavaScript Date
+      const date = new Date(year, month - 1, day, hours, minutes);
+      setBirthDate(date);
+    }
+  }, [navigate]);
+
+  if (!userData || !birthDate) {
+    return <div className="text-center p-8">Loading your birth chart...</div>;
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-white">Your Birth Chart</h1>
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md text-sm"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+      
+      <div className="mb-4 p-4 bg-black rounded-lg border border-gray-800">
+        <h2 className="text-lg font-medium mb-2 text-white">Birth Information</h2>
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div>
+            <span className="text-gray-400">Date: </span>
+            <span className="text-white">{userData.birthData?.date}</span>
+          </div>
+          <div>
+            <span className="text-gray-400">Time: </span>
+            <span className="text-white">{userData.birthData?.time}</span>
+          </div>
+          <div>
+            <span className="text-gray-400">Location: </span>
+            <span className="text-white">{userData.birthData?.place}</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Pass the birth date to the AstrologyChart component */}
+      <AstrologyChart fixedDate={birthDate} />
+    </div>
+  );
+};
+
+export default BirthChart;
+
+
+// components/Auth/ProtectedRoute.js - Route protection for authenticated pages
+import React, { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    setIsAuthenticated(user.isAuthenticated === true);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return <div className="text-center p-8">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;
+
+
+// components/AstrologyChart.js - Modified chart component to accept a specific date
+import React, { useState, useEffect, useRef } from 'react';
+
+// This would be a modified version of your LiveAstrologyChartDemo component
+// The key change is accepting a fixedDate prop and using it instead of currentDate
+const AstrologyChart = ({ fixedDate }) => {
+  // Use fixedDate if provided, otherwise use current date
+  const [chartDate, setChartDate] = useState(fixedDate || new Date());
+  const [planets, setPlanets] = useState([]);
+  const [aspectLines, setAspectLines] = useState([]);
+  const [selectedPlanet, setSelectedPlanet] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Animation frame reference (only used for live mode)
+  const animationRef = useRef();
+  
+  // All your existing chart calculation code goes here
+  // ...
+  
+  // Initial setup with modified animation logic
+  useEffect(() => {
+    setIsLoading(true);
+    
+    try {
+      // Calculate positions for the fixed date
+      const calculatedPlanets = calculatePlanetaryPosition(chartDate);
+      setPlanets(calculatedPlanets);
+      setAspectLines(calculateAspects(calculatedPlanets));
+      
+      // Only start animation if no fixedDate is provided (live mode)
+      if (!fixedDate) {
+        requestAnimationFrame(updateAnimation);
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error in chart initialization:", error);
+    }
+    
+    // Cleanup animation on unmount (only relevant for live mode)
+    return () => {
+      if (!fixedDate && animationRef.current && animationRef.current.id) {
+        cancelAnimationFrame(animationRef.current.id);
+      }
+    };
+  }, [chartDate, fixedDate]);
+
+  // All rendering code remains the same...
+  
+  return (
+    // Your existing JSX rendering code goes here
+    <div>
+      {/* This is a placeholder. Your actual chart rendering would go here. */}
+    </div>
+  );
+};
+
+export default AstrologyChart;
